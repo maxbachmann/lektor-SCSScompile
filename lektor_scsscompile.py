@@ -17,8 +17,8 @@ class SCSScompilePlugin(Plugin):
         self.source_dir = config.get('source_dir', 'asset_sources/scss/')
         self.output_dir = config.get('output_dir', 'assets/css/')
         self.output_style = config.get('output_style', 'compressed')
-        self.source_comments = config.get('source_comments', False)
-        self.precision = config.get('precision', 5)
+        self.source_comments = config.get('source_comments', 'False')
+        self.precision = config.get('precision', '5')
 
 
     def is_enabled(self, build_flags):

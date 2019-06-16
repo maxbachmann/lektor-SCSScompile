@@ -16,7 +16,7 @@ lektor plugins add lektor-scsscompile
 Or by hand, adding the plugin to the packages section in your lektorproject file::
 ```bash
 [packages]
-lektor-scsscompile = 0.3
+lektor-scsscompile = 1.0.1
 ```
 
 ## Usage
