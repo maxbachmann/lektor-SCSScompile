@@ -4,6 +4,7 @@ import errno
 
 import sass
 from lektor.pluginsystem import Plugin
+from termcolor import colored
 
 COMPILE_FLAG = "scsscompile"
 
@@ -28,25 +29,26 @@ class SCSScompilePlugin(Plugin):
         """
         Compiles the target scss file.
         """
-        result = None
-        with open(target, 'r') as fr:
-            result = sass.compile(
-                string=fr.read(), 
-                output_style=self.output_style,
-                precision=int(self.precision),
-                source_comments=(self.source_comments.lower()=='true')
-            )
-               string=(root_scss, output), 
-        if result == None:
-            return
-
         filename = os.path.splitext(os.path.basename(target))[0]
         if not filename.endswith(self.name_prefix):
             filename += self.name_prefix
         filename += '.css'
         output_file = os.path.join(output, filename)
+
+        if (os.path.isfile(output_file) and os.path.getmtime(target) <= os.path.getmtime(output_file)):
+            return
+        
+
+        result = sass.compile(
+                filename=target,
+                output_style=self.output_style,
+                precision=int(self.precision),
+                source_comments=(self.source_comments.lower()=='true')
+            )
+
         with open(output_file, 'w') as fw:
             fw.write(result)
+        print(colored('css', 'green') + ' ' + self.source_dir + os.path.basename(target) + ' -> ' + self.output_dir + filename)
 
     def make_sure_path_exists(self, path):
         # os.makedirs(path,exist_ok=True) in python3
