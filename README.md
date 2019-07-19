@@ -1,5 +1,5 @@
 # SCSScompile
-[![PyPI version](https://badge.fury.io/py/lektor-scsscompile.svg)](https://badge.fury.io/py/lektor-scsscompile)
+[![PyPI version](https://badge.fury.io/py/lektor-scsscompile.svg)](https://badge.fury.io/py/lektor-scsscompile) [![Downloads](https://pepy.tech/badge/lektor-scsscompile)](https://pepy.tech/project/lektor-scsscompile)
 
 SCSS compiler for Lektor that automatically compiles sass.
 
