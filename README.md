@@ -4,7 +4,7 @@
 SCSS compiler for Lektor that automatically compiles sass.
 
 Uses [libsass](https://github.com/sass/libsass-python)  and looks for .scss/.sass files (ignores part files that begin with a underscore e.g. '_testfile.scss'),
-compiling them as part of the build process.
+compiling them as part of the build process. It only rebuilds when it's needed (file changed, a file it imports changed or the config changed). When starting the the development server it watchs the files for changes in the background and rebuilds them when needed.
 
 ## Installing
 
@@ -16,7 +16,7 @@ lektor plugins add lektor-scsscompile
 Or by hand, adding the plugin to the packages section in your lektorproject file::
 ```bash
 [packages]
-lektor-scsscompile = 1.0.1
+lektor-scsscompile = 1.2.1
 ```
 
 ## Usage
@@ -24,6 +24,9 @@ lektor-scsscompile = 1.0.1
 
 To enable scsscompile, pass the `scsscompile` flag when starting the development
 server or when running a build::
+```bash
+lektor build -f scsscompile
+```
 ```bash
 lektor build -f scsscompile
 ```
