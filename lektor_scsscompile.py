@@ -125,19 +125,24 @@ class SCSScompilePlugin(Plugin):
 
         root_scss = os.path.join(self.env.root_path, self.source_dir )
         output = os.path.join(self.env.root_path, self.output_dir )
+        config_file = os.path.join(self.env.root_path, 'configs/scsscompile.ini')
 
         # output path has to exist
         os.makedirs(output, exist_ok=True)
 
+        dependencies = []
+        if ( os.path.isfile(config_file)):
+            dependencies.append(config_file)
+
         if self.run_watcher:
             watch_files = []
             for filename in self.find_files(root_scss):
-                dependencies = self.find_dependencies(filename)
+                dependencies += self.find_dependencies(filename)
                 watch_files.append([filename, dependencies])
             self.watcher = threading.Thread(target=self.thread, args=(output, watch_files))
             self.watcher.start()
         else:
             for filename in self.find_files(root_scss):
                 # get dependencies by searching imports in target files
-                dependencies = self.find_dependencies(filename)
+                dependencies += self.find_dependencies(filename)
                 self.compile_file(filename, output, dependencies)

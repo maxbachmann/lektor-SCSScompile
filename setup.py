@@ -25,7 +25,7 @@ setup(
     packages=find_packages(),
     py_modules=['lektor_scsscompile'],
     url='https://github.com/maxbachmann/lektor-SCSScompile',
-    version='1.2.1',
+    version='1.2.2',
     install_requires  =  [
         "libsass", "termcolor",
     ],
@@ -35,7 +35,6 @@ setup(
         "Environment :: Plugins",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
     ],
     entry_points={
