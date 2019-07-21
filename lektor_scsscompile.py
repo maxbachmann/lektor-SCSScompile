@@ -41,13 +41,21 @@ class SCSScompilePlugin(Plugin):
                 # find correct filename and add to watchlist (recursive so dependencies of dependencies get added aswell)
                 for file in files.split(","):
                     file = file.strip()
+                    # when filename ends with css libsass converts it to a url()
                     if file.endswith('.css'):
                         continue
                     
                     basepath = os.path.dirname(target)
                     filepath = os.path.dirname(file)
                     basename = os.path.basename(file)
-                    filenames = [basename, '_' + basename, basename + '.scss', '_' + basename + '.scss']
+                    filenames = [
+                        basename,
+                        '_' + basename,
+                        basename + '.scss',
+                        basename + '.css',
+                        '_' + basename + '.scss',
+                        '_' + basename + '.css'
+                    ]
 
                     for filename in filenames:
                         path = os.path.join(basepath, filepath, filename)
