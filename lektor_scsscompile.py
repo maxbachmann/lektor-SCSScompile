@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-#import errno
 
 import sass
 import re
@@ -28,8 +27,8 @@ class SCSScompilePlugin(Plugin):
         self.watcher = None
         self.run_watcher = False
 
-    def is_enabled(self, build_flags) -> bool:
-        return bool(build_flags.get(COMPILE_FLAG))
+    def is_enabled(self, extra_flags) -> bool:
+        return bool(extra_flags.get(COMPILE_FLAG))
 
     def find_dependencies(self, target) -> list:
         dependencies = [target]
@@ -95,7 +94,7 @@ class SCSScompilePlugin(Plugin):
         print(colored('css', 'green'), self.source_dir + os.path.basename(target), '\u27a1', self.output_dir + filename)
         
 
-    def find_files(self, destination):
+    def find_files(self, destination) -> Iterator[str]:
         """
         Finds all scss files in the given destination. (ignore files starting with _)
         """
@@ -122,8 +121,6 @@ class SCSScompilePlugin(Plugin):
     def on_server_stop(self, **extra):
         if self.watcher is not None:
             self.run_watcher = False
-            print('stopped')
-        
   
     def on_before_build_all(self, builder, **extra):
         extra_flags = getattr(
