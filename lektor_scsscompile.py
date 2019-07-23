@@ -18,7 +18,7 @@ class SCSScompilePlugin(Plugin):
     def __init__(self, *args, **kwargs):
         Plugin.__init__(self, *args, **kwargs)
         config = self.get_config()
-        self.source_dir_short = config.get('source_dir', 'asset_sources/scss/')
+        self.source_dir_short = config.get('source_dir', 'assets/scss/')
         self.output_dir_short = config.get('output_dir', 'assets/css/')
         self.output_style = config.get('output_style', 'compressed')
         self.source_comments = config.get('source_comments', 'False')
