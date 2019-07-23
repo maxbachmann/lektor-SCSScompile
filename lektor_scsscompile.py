@@ -30,19 +30,33 @@ class SCSScompilePlugin(Plugin):
     def is_enabled(self, extra_flags) -> bool:
         return bool(extra_flags.get(COMPILE_FLAG))
 
-    def find_dependencies(self, target) -> list:
-        dependencies = [target]
+    def is_current(self, dependencies) -> bool:
+        for dependency in dependencies:
+            if ( not os.path.isfile(output_file) or os.path.getmtime(dependency) > os.path.getmtime(output_file)):
+                return False
+        return True
+    
+    def find_imports(self, target) -> list:
         with open(target, 'r') as f:
             data = f.read()
-
         imports = re.findall(r'@import\s+((?:[\'|\"]\S+[\'|\"]\s*(?:,\s*(?:\/\/\s*|)|;))+)', data)
         for files in imports:
             files = re.sub('[\'\"\n\r;]', '', files)
+        return [x.strip() for x in files.split(',')]
+    
+    def add_prefix(self, target, output) -> str:
+        filename = os.path.splitext(os.path.basename(target))[0]
+        if not filename.endswith(self.name_prefix):
+            filename += self.name_prefix
+        filename += '.css'
+        return os.path.join(output, filename)
 
-        file_list = [x.strip() for x in files.split(',')]
+    def find_dependencies(self, target) -> list:
+        dependencies = [target]
         basepath = os.path.dirname(target)
+        
         # find correct filename and add to watchlist (recursive so dependencies of dependencies get added aswell)
-        for file in file_list:
+        for file in self.find_imports(target):
             # when filename ends with css libsass converts it to a url()
             if file.endswith('.css'):
                 continue
@@ -63,25 +77,15 @@ class SCSScompilePlugin(Plugin):
                 if os.path.isfile(path):
                     dependencies += self.find_dependencies(path)
         return dependencies
-
-    def is_current(self, dependencies) -> bool:
-        for dependency in dependencies:
-            if ( not os.path.isfile(output_file) or os.path.getmtime(dependency) > os.path.getmtime(output_file)):
-                return False
-        return True
     
     def compile_file(self, target, output, dependencies):
         """
         Compiles the target scss file.
         """
         filename = os.path.splitext(os.path.basename(target))[0]
-        if not filename.endswith(self.name_prefix):
-            filename += self.name_prefix
-        filename += '.css'
-        output_file = os.path.join(output, filename)
 
         # check if dependency changed and rebuild if it did
-        if is_current(dependencies):
+        if self.is_current(dependencies):
             return
 
         result = sass.compile(
@@ -90,7 +94,7 @@ class SCSScompilePlugin(Plugin):
                 precision=int(self.precision),
                 source_comments=(self.source_comments.lower()=='true')
             )
-        with open(output_file, 'w') as fw:
+        with open(self.add_prefix(target, output), 'w') as fw:
             fw.write(result)
         
         print(colored('css', 'green'), self.source_dir + os.path.basename(target), '\u27a1', self.output_dir + filename)
