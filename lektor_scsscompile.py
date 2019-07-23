@@ -5,6 +5,7 @@ import os
 import sass
 import re
 from lektor.pluginsystem import Plugin
+from lektor.reporter import reporter
 from termcolor import colored
 import threading
 import time
@@ -113,6 +114,9 @@ class SCSScompilePlugin(Plugin):
             time.sleep(1)
 
     def on_server_spawn(self, **extra):
+        extra_flags = extra.get("extra_flags") or extra.get("build_flags") or {}
+        if not self.is_enabled(extra_flags):
+            return
         self.run_watcher  = True
 
     def on_server_stop(self, **extra):
@@ -122,14 +126,12 @@ class SCSScompilePlugin(Plugin):
         
   
     def on_before_build_all(self, builder, **extra):
-        try: # lektor 3+
-            is_enabled = self.is_enabled(builder.extra_flags)
-        except AttributeError: # lektor 2+
-            is_enabled = self.is_enabled(builder.build_flags)
-
-        # only run when server runs
-        if not is_enabled or self.watcher:
-            return
+        extra_flags = getattr(
+            builder, "extra_flags", getattr(builder, "build_flags", None)
+        )
+        if not self.is_enabled(extra_flags) \
+           or self.watcher is not None:
+             return
 
         root_scss = os.path.join(self.env.root_path, self.source_dir )
         output = os.path.join(self.env.root_path, self.output_dir )
