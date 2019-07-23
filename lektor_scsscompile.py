@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
-
+import click
 import sass
 import re
 from lektor.pluginsystem import Plugin
 from lektor.reporter import reporter
-from termcolor import colored
 import threading
 import time
 
@@ -111,9 +110,14 @@ class SCSScompilePlugin(Plugin):
             )
         with open(self.add_prefix(target, self.output_dir), 'w') as fw:
             fw.write(result)
-        
-        print(colored('css', 'green'), self.source_dir_short + os.path.basename(target), '\u27a1', self.add_prefix(target, self.output_dir_short))
-        
+            
+        sign = click.style('css', fg='green')
+        click.echo('{} {} {} {}'.format(
+            sign,
+            os.path.join(self.source_dir_short, os.path.basename(target)),
+            '\u27a1',
+            self.add_prefix(target, self.output_dir_short)
+        ))
 
     def find_files(self, destination) -> Iterator[str]:
         """
@@ -125,9 +129,11 @@ class SCSScompilePlugin(Plugin):
                     yield os.path.join(root, f)            
 
     def thread(self, watch_files):
+        reporter.report_generic('Spawning scss watcher')
         while True:
             if not self.run_server:
                 self.watcher = None
+                reporter.report_generic('Stopping scss watcher')
                 break
             for filename, dependencies in watch_files:
                 self.compile_file(filename, dependencies)
@@ -157,5 +163,7 @@ class SCSScompilePlugin(Plugin):
             self.watcher = threading.Thread(target=self.thread, args=(watch_files))
             self.watcher.start()
         else:
+            reporter.report_generic('Starting scss compiling')
             for filename in self.find_files(self.source_dir):
                 self.compile_file(filename, self.find_dependencies(filename))
+            reporter.report_generic('Finished compiling scss')
