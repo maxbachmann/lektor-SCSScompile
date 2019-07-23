@@ -34,33 +34,34 @@ class SCSScompilePlugin(Plugin):
         dependencies = [target]
         with open(target, 'r') as f:
             data = f.read()
-            imports = re.findall(r'@import\s+((?:[\'|\"]\S+[\'|\"]\s*(?:,\s*(?:\/\/\s*|)|;))+)', data)
-            for files in imports:
-                files = re.sub('[\'\"\n\r;]', '', files)
-                
-                # find correct filename and add to watchlist (recursive so dependencies of dependencies get added aswell)
-                for file in files.split(","):
-                    file = file.strip()
-                    # when filename ends with css libsass converts it to a url()
-                    if file.endswith('.css'):
-                        continue
-                    
-                    basepath = os.path.dirname(target)
-                    filepath = os.path.dirname(file)
-                    basename = os.path.basename(file)
-                    filenames = [
-                        basename,
-                        '_' + basename,
-                        basename + '.scss',
-                        basename + '.css',
-                        '_' + basename + '.scss',
-                        '_' + basename + '.css'
-                    ]
 
-                    for filename in filenames:
-                        path = os.path.join(basepath, filepath, filename)
-                        if os.path.isfile(path):
-                            dependencies += self.find_dependencies(path)
+        imports = re.findall(r'@import\s+((?:[\'|\"]\S+[\'|\"]\s*(?:,\s*(?:\/\/\s*|)|;))+)', data)
+        for files in imports:
+            files = re.sub('[\'\"\n\r;]', '', files)
+
+        file_list = [x.strip() for x in files.split(',')]
+        basepath = os.path.dirname(target)
+        # find correct filename and add to watchlist (recursive so dependencies of dependencies get added aswell)
+        for file in file_list:
+            # when filename ends with css libsass converts it to a url()
+            if file.endswith('.css'):
+                continue
+                    
+            filepath = os.path.dirname(file)
+            basename = os.path.basename(file)
+            filenames = [
+                basename,
+                '_' + basename,
+                basename + '.scss',
+                basename + '.css',
+                '_' + basename + '.scss',
+                '_' + basename + '.css'
+            ]
+
+            for filename in filenames:
+                path = os.path.join(basepath, filepath, filename)
+                if os.path.isfile(path):
+                    dependencies += self.find_dependencies(path)
         return dependencies
 
     def compile_file(self, target, output, dependencies):
