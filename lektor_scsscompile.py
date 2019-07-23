@@ -25,7 +25,7 @@ class SCSScompilePlugin(Plugin):
         self.precision = config.get('precision', '5')
         self.name_prefix = config.get('name_prefix', '')
         self.watcher = None
-        self.run_watcher = False
+        self.run_server = False
 
     @property
     def source_dir(self) -> str:
@@ -68,8 +68,10 @@ class SCSScompilePlugin(Plugin):
 
     def find_dependencies(self, target) -> list:
         dependencies = [target]
+        if self.config_file is not None:
+            dependencies.append(self.config_file)
+
         basepath = os.path.dirname(target)
-        
         # find correct filename and add to watchlist (recursive so dependencies of dependencies get added aswell)
         for file in self.find_imports(target):
             # when filename ends with css libsass converts it to a url()
@@ -124,7 +126,7 @@ class SCSScompilePlugin(Plugin):
 
     def thread(self, watch_files):
         while True:
-            if not self.run_watcher:
+            if not self.run_server:
                 self.watcher = None
                 break
             for filename, dependencies in watch_files:
@@ -132,14 +134,10 @@ class SCSScompilePlugin(Plugin):
             time.sleep(1)
 
     def on_server_spawn(self, **extra):
-        extra_flags = extra.get("extra_flags") or extra.get("build_flags") or {}
-        if not self.is_enabled(extra_flags):
-            return
-        self.run_watcher  = True
+        self.run_server = True
 
     def on_server_stop(self, **extra):
-        if self.watcher is not None:
-            self.run_watcher = False
+        self.run_server = False
   
     def on_before_build_all(self, builder, **extra):
         extra_flags = getattr(
@@ -152,19 +150,12 @@ class SCSScompilePlugin(Plugin):
         # output path has to exist
         os.makedirs(self.output_dir_long, exist_ok=True)
 
-        dependencies = []
-        if self.config_file is not None:
-            dependencies.append(self.config_file)
-
-        if self.run_watcher:
+        if self.run_server:
             watch_files = []
             for filename in self.find_files(self.source_dir):
-                dependencies += self.find_dependencies(filename)
-                watch_files.append([filename, dependencies])
+                watch_files.append([filename, self.find_dependencies(filename)])
             self.watcher = threading.Thread(target=self.thread, args=(watch_files))
             self.watcher.start()
         else:
             for filename in self.find_files(self.source_dir):
-                # get dependencies by searching imports in target files
-                dependencies += self.find_dependencies(filename)
-                self.compile_file(filename, dependencies)
+                self.compile_file(filename, self.find_dependencies(filename))
