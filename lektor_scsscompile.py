@@ -64,6 +64,12 @@ class SCSScompilePlugin(Plugin):
                     dependencies += self.find_dependencies(path)
         return dependencies
 
+    def is_current(self, dependencies) -> bool:
+        for dependency in dependencies:
+            if ( not os.path.isfile(output_file) or os.path.getmtime(dependency) > os.path.getmtime(output_file)):
+                return False
+        return True
+    
     def compile_file(self, target, output, dependencies):
         """
         Compiles the target scss file.
@@ -75,12 +81,7 @@ class SCSScompilePlugin(Plugin):
         output_file = os.path.join(output, filename)
 
         # check if dependency changed and rebuild if it did
-        rebuild = False
-        for dependency in dependencies:
-            if ( not os.path.isfile(output_file) or os.path.getmtime(dependency) > os.path.getmtime(output_file)):
-                rebuild = True
-                break
-        if not rebuild:
+        if is_current(dependencies):
             return
 
         result = sass.compile(
