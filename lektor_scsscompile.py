@@ -1,7 +1,6 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-#import errno
-
 import sass
 import re
 from lektor.pluginsystem import Plugin
