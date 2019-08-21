@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# make print compatible with python2
+from __future__ import print_function
+
 import os
 import sass
 import re
@@ -26,10 +29,10 @@ class SCSScompilePlugin(Plugin):
         self.watcher = None
         self.run_watcher = False
 
-    def is_enabled(self, build_flags) -> bool:
+    def is_enabled(self, build_flags):
         return bool(build_flags.get(COMPILE_FLAG))
 
-    def find_dependencies(self, target) -> list:
+    def find_dependencies(self, target):
         dependencies = [target]
         with open(target, 'r') as f:
             data = f.read()
@@ -120,6 +123,13 @@ class SCSScompilePlugin(Plugin):
             print('stopped')
         
   
+    def make_sure_path_exists(self, path):
+        try:
+            os.makedirs(path)
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
+
     def on_before_build_all(self, builder, **extra):
         try: # lektor 3+
             is_enabled = self.is_enabled(builder.extra_flags)
@@ -135,7 +145,8 @@ class SCSScompilePlugin(Plugin):
         config_file = os.path.join(self.env.root_path, 'configs/scsscompile.ini')
 
         # output path has to exist
-        os.makedirs(output, exist_ok=True)
+        #os.makedirs(output, exist_ok=True) when python2 finally runs out
+        self.make_sure_path_exists(output)
 
         dependencies = []
         if ( os.path.isfile(config_file)):
