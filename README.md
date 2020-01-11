@@ -16,7 +16,7 @@ lektor plugins add lektor-scsscompile
 Or by hand, adding the plugin to the packages section in your lektorproject file::
 ```bash
 [packages]
-lektor-scsscompile = 1.2.4
+lektor-scsscompile = 1.3.0
 ```
 
 ## Usage
@@ -33,12 +33,13 @@ lektor build -f scsscompile
 
 The Plugin has the following settings you can adjust to your needs:
 
-|parameter      |default value      |description                                                                                       |
-|---------------|-------------------|--------------------------------------------------------------------------------------------------|
-|source_dir     |asset_sources/scss/| the directory in which the plugin searchs for sass files (subdirectories are included)           |
-|output_dir     |assets/css/        | the directory the compiled css files get place at                                                |
-|output_style   |compressed         | coding style of the compiled result. choose one of: 'nested', 'expanded', 'compact', 'compressed'|
-|source_comments|False              | whether to add comments about source lines                                                       |
-|precision      |5                  | precision for numbers                                                                            |
+|parameter        |default value      |description                                                                                       |
+|-----------------|-------------------|--------------------------------------------------------------------------------------------------|
+|source_dir       |asset_sources/scss/| the directory in which the plugin searchs for sass files (subdirectories are included)           |
+|output_dir       |assets/css/        | the directory the compiled css files get place at                                                |
+|output_style     |compressed         | coding style of the compiled result. choose one of: 'nested', 'expanded', 'compact', 'compressed'|
+|source_comments  |False              | whether to add comments about source lines                                                       |
+|precision        |5                  | precision for numbers                                                                            |
+|output_source_map|False              | whether a source map should be generated                                                         |
 
 An example file with the default config can be found at `configs/scsscompile.ini`

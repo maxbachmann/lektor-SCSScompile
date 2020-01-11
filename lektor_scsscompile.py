@@ -25,6 +25,7 @@ class SCSScompilePlugin(Plugin):
         self.source_comments = config.get('source_comments', 'False')
         self.precision = config.get('precision', '5')
         self.name_prefix = config.get('name_prefix', '')
+        self.output_source_map = config.get('output_source_map', 'False')
         self.watcher = None
         self.run_watcher = False
 
@@ -69,10 +70,11 @@ class SCSScompilePlugin(Plugin):
         Compiles the target scss file.
         """
         filename = os.path.splitext(os.path.basename(target))[0]
+        source_map_file = os.path.join(output, filename + '.map')
         if not filename.endswith(self.name_prefix):
             filename += self.name_prefix
-        filename += '.css'
-        output_file = os.path.join(output, filename)
+        output_file = os.path.join(output, filename + '.css')
+
 
         # check if dependency changed and rebuild if it did
         rebuild = False
@@ -83,14 +85,29 @@ class SCSScompilePlugin(Plugin):
         if not rebuild:
             return
 
-        result = sass.compile(
+        if (self.output_source_map.lower()=='true'):
+            css, source_map = sass.compile(
+                filename=target,
+                output_style=self.output_style,
+                precision=int(self.precision),
+                source_comments=(self.source_comments.lower()=='true'),
+                source_map_filename=source_map_file
+            )
+            with open(output_file, 'w') as fw:
+                fw.write(css)
+
+            with open(source_map_file, 'w') as fw:
+                fw.write(source_map)
+        
+        else:
+            css = sass.compile(
                 filename=target,
                 output_style=self.output_style,
                 precision=int(self.precision),
                 source_comments=(self.source_comments.lower()=='true')
             )
-        with open(output_file, 'w') as fw:
-            fw.write(result)
+            with open(output_file, 'w') as fw:
+                fw.write(css)
         
         print(colored('css', 'green'), self.source_dir + os.path.basename(target), '\u27a1', self.output_dir + filename)
         
