@@ -20,7 +20,6 @@ lektor-scsscompile = 1.3.0
 ```
 
 ## Usage
-#####
 
 To enable scsscompile, pass the `scsscompile` flag when starting the development
 server or when running a build::
